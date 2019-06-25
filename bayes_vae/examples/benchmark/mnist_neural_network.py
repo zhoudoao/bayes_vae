@@ -28,7 +28,11 @@ import tensorflow_probability as tfp
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
+import os
+import pickle
 
+home = os.path.expanduser('~')
 
 # MNIST datasets
 INPUT_SHAPE = 784
@@ -69,7 +73,7 @@ def train(model):
     """Training model.
     
     Args:
-        Model or sequential model.
+        model: Model or sequential model.
     
     Returns:
         History of the model training.
@@ -86,8 +90,9 @@ def train(model):
 
 
 lr = 0.01
-epochs = 20
-nn_2layers = neural_network([400, 400])
+epochs = 5
+hidden_layers = [400, 400]
+nn_2layers = neural_network(hidden_layers)
 nn_2l_history = train(nn_2layers)
 
 
@@ -136,27 +141,50 @@ def plot_history(history, title=None):
 plot_history(nn_2l_history, title='2 layers neural network')
 
 
-# Todo
-# def plot_weights(model, num_layer):
-#     # num = num_layer * 2
-#     weights = model.trainable_weights
-
-#     fig = plt.figure()
-#     for i in range(num_layer):
-#         ax_left = fig.add_subplot(num_layer, 2, 2*i)
-#         ax_left.hist()
-
-
+def plot_weights(model, num_layer):
+    """Plot weights of the model.
     
+    Args:
+        model: Model or Sequential model.
+        num_layer: Number of the hidden layers.
+    """
+    weights = model.trainable_weights
 
-# Todo
-# Save model
-    
-exit    
+    fig = plt.figure()
+    for i in range(num_layer):
+        kernel = weights[2*i].numpy().flatten()
+        bias = weights[2*i+1].numpy()
+
+        ax_left = fig.add_subplot(num_layer, 2, 2*i+1)
+        sns.distplot(kernel, ax=ax_left)
+        ax_left.legend()
+        ax_left.set_title('kernel {}'.format(i))
+
+        ax_right = fig.add_subplot(num_layer, 2, 2*i+2)
+        sns.distplot(bias, ax=ax_right)
+        ax_right.legend()
+        ax_right.set_title('bias {}'.format(i))
 
 
+num_layer = len(hidden_layers)    
+plot_weights(nn_2layers, num_layer)
 
 
+# Save weights
+def save_model_weights(model, model_path):
+    if not os.path.exists(model_path):
+        os.makedirs(model_path)
+    model.save_weights(model_path)
 
 
+checkpoint_path = ''.join([home, '/logs/bayes_vae/benchmark/mnist_nn/'])
+save_model_weights(nn_2layers, checkpoint_path)
 
+# Save history
+def save_model_history(history, fn_path):
+    with open(fn_path, 'wb') as fp:
+        pickle.dump(history.history, fp)
+
+
+history_path = ''.join([checkpoint_path, 'history'])
+save_model_history(nn_2l_history, history_path)
