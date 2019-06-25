@@ -1,0 +1,2 @@
+tf-nightly-gpu-2.0-preview>=2.0.0
+tfp-nightly>=0.8.0
