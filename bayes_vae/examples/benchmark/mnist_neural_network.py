@@ -60,7 +60,6 @@ def neural_network(hidden_layers, activation='relu'):
     Returns:
         A sequential model.
     """
-
     nn = tf.keras.Sequential()
     for hidden_layer in hidden_layers:
         nn.add(tf.keras.layers.Dense(hidden_layer, activation=activation))
@@ -69,19 +68,20 @@ def neural_network(hidden_layers, activation='relu'):
     return nn
 
 
-def train(model):
+def train(model, loss, optimizer, metrics):
     """Training model.
     
     Args:
         model: Model or sequential model.
+        loss: Loss function. Such as categorical_crossentropy, 
+            mean_squared_error.
+        optimizer: Optimizer method such as Adam, SGD.
+        metrics: List. A list of names of metrics. Such as ['mse'], ['acc'].
     
     Returns:
         History of the model training.
     """    
-    loss = tf.keras.losses.categorical_crossentropy
-    metrics = ['accuracy']
-    optimizer = tf.keras.optimizers.Adam(lr)
-
+    
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     history = model.fit(train_images, train_labels, epochs=epochs,
         batch_size=BATCH_SIZE, validation_data=(test_images, test_labels), 
@@ -92,8 +92,11 @@ def train(model):
 lr = 0.01
 epochs = 5
 hidden_layers = [400, 400]
+loss = tf.keras.losses.categorical_crossentropy
+metrics = ['accuracy']
+optimizer = tf.keras.optimizers.Adam(lr)
 nn_2layers = neural_network(hidden_layers)
-nn_2l_history = train(nn_2layers)
+nn_2l_history = train(nn_2layers, loss, optimizer, metrics)
 
 
 # Metrics
